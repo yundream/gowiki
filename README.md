@@ -40,8 +40,10 @@ func (h Hello) Sum(a, b int) int {
 ```
 
 테스트다. 지금은 하드코딩 했는데, 실제 구현에서는 템플릿으로 go 코드를 만들어서 빌드를 해야 할 것 같다.
-# plugin 디렉토리에 있는 파일을 읽어서 import 목록을 구성한다.
-# plugin 디렉토리에 있는 파일 이름으로 packagename.New()를 호출 플러그인 맵을 구성한다.
+
+* plugin 디렉토리에 있는 파일을 읽어서 import 목록을 구성한다.
+* plugin 디렉토리에 있는 파일 이름으로 packagename.New()를 호출 플러그인 맵을 구성한다.
+
 ```go
 package main
 
