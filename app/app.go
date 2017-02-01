@@ -3,7 +3,6 @@ package app
 import (
 	"github.com/yundream/gowiki/handler"
 	"log"
-	"net/http"
 )
 
 type Application struct {
@@ -16,8 +15,9 @@ func New(port string) *Application {
 
 func (a Application) Run() {
 	h := handler.New()
-	http.Handle("/", h.Router)
-	err := http.ListenAndServe(a.Port, nil)
+	h.DocumentDirectory = "/opt/gowiki/doc"
+	h.Theme = "joinc"
+	err := h.Run(a.Port)
 	if err != nil {
 		log.Fatal("Server run error : ", err.Error())
 	}
