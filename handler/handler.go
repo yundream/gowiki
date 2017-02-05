@@ -17,6 +17,8 @@ func New() *Handler {
 	h.Router = mux.NewRouter()
 	h.Router.HandleFunc("/ping", h.Ping).Methods("GET")
 	http.Handle("/", h.Middleware(h.Router))
+	http.Handle("/w/{page:.+}")
+	http.Handle("/theme/", http.FileServer(http.Dir("./")))
 	return h
 }
 
