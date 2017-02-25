@@ -7,6 +7,10 @@ import (
 	"net/http"
 )
 
+type Options struct {
+	Name string
+	Age  int
+}
 type Handler struct {
 	Theme             string
 	Router            *mux.Router
@@ -50,11 +54,7 @@ func (h *Handler) LoadTemplate(theme string) error {
 	return nil
 }
 
-func (h *Handler) Viewer(w http.ResponseWriter, r *http.Request) {
-	h.sendData(w, nil)
-}
-
-func (h *Handler) sendData(w http.ResponseWriter, v *interface{}) error {
+func (h Handler) Render(w http.ResponseWriter, v *interface{}) error {
 	err := h.Template.ExecuteTemplate(w, "head", v)
 	if err != nil {
 		return err
