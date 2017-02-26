@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/yundream/gowiki/wiki"
 	"html/template"
 	"net/http"
 )
@@ -16,16 +17,21 @@ type Handler struct {
 	Router            *mux.Router
 	DocumentDirectory string
 	Template          *template.Template
+	Wiki              *wiki.Wiki
 }
 
-func New() *Handler {
-	h := &Handler{}
+func New() (*Handler, error) {
+	w, err := wiki.New("localhost")
+	if err != nil {
+		return nil, err
+	}
+	h := &Handler{Wiki: w}
 	h.Router = mux.NewRouter()
 	h.Router.HandleFunc("/ping", h.Ping).Methods("GET")
 	h.Router.HandleFunc("/w/{page:.+}", h.Viewer).Methods("GET")
 	http.Handle("/", h.Middleware(h.Router))
 	http.Handle("/theme/", http.FileServer(http.Dir("./")))
-	return h
+	return h, nil
 }
 
 func (h Handler) Run(port string) error {
@@ -54,12 +60,17 @@ func (h *Handler) LoadTemplate(theme string) error {
 	return nil
 }
 
-func (h Handler) Render(w http.ResponseWriter, v *interface{}) error {
-	err := h.Template.ExecuteTemplate(w, "head", v)
+func (h Handler) RenderPage(w http.ResponseWriter, pageName string) error {
+	err := h.Template.ExecuteTemplate(w, "head", nil)
 	if err != nil {
 		return err
 	}
-	err = h.Template.ExecuteTemplate(w, "tail", v)
+	page, err := h.Wiki.ReadPage(pageName)
+	if err != nil {
+		return err
+	}
+	w.Write([]byte(page.Contents))
+	err = h.Template.ExecuteTemplate(w, "tail", nil)
 	if err != nil {
 		return err
 	}

@@ -14,9 +14,12 @@ func New(port string) *Application {
 }
 
 func (a Application) Run() {
-	h := handler.New()
+	h, err := handler.New()
+	if err != nil {
+		log.Fatal("Server run error : ", err.Error())
+	}
 	h.DocumentDirectory = "/opt/gowiki/doc"
-	err := h.LoadTemplate("joinc")
+	err = h.LoadTemplate("joinc")
 	if err != nil {
 		log.Fatal("Server run error : ", err.Error())
 	}

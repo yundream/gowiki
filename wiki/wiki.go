@@ -2,7 +2,6 @@ package wiki
 
 import (
 	"errors"
-	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -53,7 +52,6 @@ func (w Wiki) ReadPage(name string) (*Page, error) {
 	if n == 0 {
 		return nil, errors.New("Page not found")
 	}
-
 	page := Page{}
 	err = q.One(&page)
 	if err != nil {
