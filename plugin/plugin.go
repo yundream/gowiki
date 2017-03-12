@@ -3,7 +3,6 @@ package plugin
 import (
 	"errors"
 	"fmt"
-	"github.com/yundream/gowiki/handler"
 	"io/ioutil"
 	"os"
 	"plugin"
@@ -19,42 +18,47 @@ func Load() (*PlugIns, error) {
 	plugins := &PlugIns{}
 	plugins.pluginList = make(Fmap)
 
-	files, err := ioutil.ReadDir("./")
+	files, err := ioutil.ReadDir("./plugin")
 	if err != nil {
 		return nil, err
 	}
 
 	for _, file := range files {
-		func(os.FileInfo) {
-			if !file.IsDir() {
-				return
-			}
-			so := fmt.Sprintf("./%s/%s.so", file.Name(), file.Name())
-			if _, err := os.Stat(so); os.IsNotExist(err) {
-				return
-			}
-			fmt.Println("Plugin loading...", so)
-		}(file)
+		if !file.IsDir() {
+			continue
+		}
+		sofile := fmt.Sprintf("./plugin/%s/%s.so", file.Name(), file.Name())
+		fmt.Println("Plugin loading...", sofile)
+		if _, err := os.Stat(sofile); os.IsNotExist(err) {
+			fmt.Println(err.Error())
+			continue
+		}
+		p, err := plugin.Open(sofile)
+		if err != nil {
+			fmt.Println("Loading Error ", err.Error())
+			return nil, err
+		}
+		sym, err := p.Lookup("Function_" + file.Name())
+		if err != nil {
+			return nil, err
+		}
+		plugins.pluginList["Function_"+file.Name()] = sym
 	}
-
-	p, err := plugin.Open("./sample/sample.so")
-	if err != nil {
-		fmt.Println("Loading Error ", err.Error())
-		return nil, err
-	}
-	sym, err := p.Lookup("Function_sample")
-	if err != nil {
-		return nil, err
-	}
-	plugins.pluginList["Function_sample"] = sym
-
+	fmt.Println("Plugins ", plugins)
 	return plugins, nil
 }
 
-func (p PlugIns) Exec(name string, data string) (string, error) {
-	if sym, ok := p.pluginList[name]; ok {
-		r := sym.(func(string, handler.Options) string)(data, handler.Options{Name: "yundream"})
+type opt struct {
+	Name string
+	Age  int
+}
+
+func (p PlugIns) Exec(fname string, fdata string) (string, error) {
+	if sym, ok := p.pluginList["Function_"+fname]; ok {
+		r := sym.(func(string, string) string)(fdata, "yundream")
 		return r, nil
+	} else {
+		fmt.Println("Plugin ", fname, "Exec Error")
 	}
 	return "", errors.New("ERROR")
 }

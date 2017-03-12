@@ -1,9 +1,12 @@
 package wiki
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"strings"
 )
 
 type Page struct {
@@ -21,6 +24,7 @@ type Wiki struct {
 	Session    *mgo.Session
 	DB         string
 	Collection string
+	compiler   *Compiler
 }
 
 func New(addr string) (*Wiki, error) {
@@ -28,9 +32,16 @@ func New(addr string) (*Wiki, error) {
 	if err != nil {
 		return nil, err
 	}
+	compiler := Compiler{}
+	err = compiler.LoadPlugin()
+	if err != nil {
+		return nil, err
+	}
 	return &Wiki{Session: session,
 		DB:         "wiki",
-		Collection: "page"}, nil
+		Collection: "page",
+		compiler:   &compiler,
+	}, nil
 }
 
 func (w Wiki) CreatePage(page *Page) error {
@@ -43,6 +54,7 @@ func (w Wiki) CreatePage(page *Page) error {
 }
 
 func (w Wiki) ReadPage(name string) (*Page, error) {
+	var buffer bytes.Buffer
 	c := w.Session.DB(w.DB).C(w.Collection)
 	q := c.Find(bson.M{"name": name})
 	n, err := q.Count()
@@ -57,5 +69,27 @@ func (w Wiki) ReadPage(name string) (*Page, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	compilerIns := w.compiler.NewIns()
+	compilerIns.Start("myid")
+
+	scanner := bufio.NewReader(strings.NewReader(page.Contents))
+	for {
+		line, _, err := scanner.ReadLine()
+		if err != nil {
+			break
+		}
+		compilerIns.Line(string(line))
+		switch compilerIns.TextType {
+		case PROCESSOR_OPEN:
+			if compilerIns.Processor() == PROCESSOR_CLOSE {
+				buffer.WriteString(compilerIns.String())
+			}
+		default:
+			compilerIns.List().Head().EscapeString().Body()
+			buffer.WriteString(compilerIns.String())
+		}
+	}
+	page.Contents = buffer.String()
 	return &page, nil
 }

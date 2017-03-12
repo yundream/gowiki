@@ -35,6 +35,7 @@ func New() (*Handler, error) {
 }
 
 func (h Handler) Run(port string) error {
+	fmt.Println("Application running... ", port)
 	err := http.ListenAndServe(port, nil)
 	return err
 }
