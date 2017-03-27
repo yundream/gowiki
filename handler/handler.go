@@ -45,7 +45,6 @@ func (h Handler) Run(port string) error {
 
 func (h Handler) Middleware(handle http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("URL ", r.URL.Path)
 		handle.ServeHTTP(w, r)
 	})
 }
@@ -69,7 +68,11 @@ func (h Handler) LoadEditor(pageName string, w http.ResponseWriter) error {
 	if err != nil {
 		return err
 	}
-
+	page, err := h.Wiki.ReadRawPage(pageName)
+	if err != nil {
+		return err
+	}
+	fmt.Println(page)
 	err = h.Template.ExecuteTemplate(w, "tail", nil)
 	if err != nil {
 		return err

@@ -58,6 +58,24 @@ func (w Wiki) CreatePage(page *Page) error {
 	return nil
 }
 
+func (w Wiki) ReadRawPage(name string) (Page, error) {
+	c := w.Session.DB(w.DB).C(w.Collection)
+	q := c.Find(bson.M{"name": name})
+	n, err := q.Count()
+	if err != nil {
+		return Page{}, err
+	}
+	if n == 0 {
+		return Page{}, StatusPageNotFound
+	}
+	page := Page{}
+	err = q.One(&page)
+	if err != nil {
+		return Page{}, err
+	}
+	return page, nil
+}
+
 func (w Wiki) ReadPage(name string, writer http.ResponseWriter, r *http.Request) (*Page, error) {
 	var buffer bytes.Buffer
 	c := w.Session.DB(w.DB).C(w.Collection)
