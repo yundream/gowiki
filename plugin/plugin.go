@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"plugin"
 )
@@ -44,7 +45,6 @@ func Load() (*PlugIns, error) {
 		}
 		plugins.pluginList["Function_"+file.Name()] = sym
 	}
-	fmt.Println("Plugins ", plugins)
 	return plugins, nil
 }
 
@@ -53,12 +53,11 @@ type opt struct {
 	Age  int
 }
 
-func (p PlugIns) Exec(fname string, fdata string) (string, error) {
+func (p PlugIns) Exec(fname string, fdata string, w http.ResponseWriter, r *http.Request) (string, error) {
 	if sym, ok := p.pluginList["Function_"+fname]; ok {
-		r := sym.(func(string, string) string)(fdata, "yundream")
+		r := sym.(func(string, string, http.ResponseWriter, *http.Request) string)(fdata, "yundream", w, r)
 		return r, nil
 	} else {
-		fmt.Println("Plugin ", fname, "Exec Error")
 	}
 	return "", errors.New("ERROR")
 }

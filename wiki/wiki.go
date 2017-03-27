@@ -6,7 +6,12 @@ import (
 	"errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"net/http"
 	"strings"
+)
+
+var (
+	StatusPageNotFound = errors.New("Page Not Found")
 )
 
 type Page struct {
@@ -53,7 +58,7 @@ func (w Wiki) CreatePage(page *Page) error {
 	return nil
 }
 
-func (w Wiki) ReadPage(name string) (*Page, error) {
+func (w Wiki) ReadPage(name string, writer http.ResponseWriter, r *http.Request) (*Page, error) {
 	var buffer bytes.Buffer
 	c := w.Session.DB(w.DB).C(w.Collection)
 	q := c.Find(bson.M{"name": name})
@@ -62,7 +67,7 @@ func (w Wiki) ReadPage(name string) (*Page, error) {
 		return nil, err
 	}
 	if n == 0 {
-		return nil, errors.New("Page not found")
+		return nil, StatusPageNotFound
 	}
 	page := Page{}
 	err = q.One(&page)
@@ -70,7 +75,7 @@ func (w Wiki) ReadPage(name string) (*Page, error) {
 		return nil, err
 	}
 
-	compilerIns := w.compiler.NewIns()
+	compilerIns := w.compiler.NewIns(writer, r)
 	compilerIns.Start("myid")
 
 	scanner := bufio.NewReader(strings.NewReader(page.Contents))

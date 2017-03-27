@@ -31,8 +31,8 @@ type RequestOptions struct {
 	UserName    string
 	SessionName string
 	Theme       string
-	Request     *http.Request
-	Response    http.ResponseWriter
+	R           *http.Request
+	W           http.ResponseWriter
 }
 
 type Compiler struct {
@@ -47,9 +47,11 @@ type Compiler struct {
 	TextType        int
 	opt             RequestOptions
 	P               *plugin.PlugIns
+	w               http.ResponseWriter
+	r               *http.Request
 }
 
-func (c Compiler) NewIns() *Compiler {
+func (c Compiler) NewIns(w http.ResponseWriter, r *http.Request) *Compiler {
 	/*
 		c.TextType = HEAD
 		c.listStack = list.New()
@@ -58,6 +60,8 @@ func (c Compiler) NewIns() *Compiler {
 		P:         c.P,
 		TextType:  HEAD,
 		listStack: list.New(),
+		w:         w,
+		r:         r,
 	}
 	return ins
 }
@@ -302,22 +306,20 @@ func (c *Compiler) ExecPlugin() *Compiler {
 			sidx := strings.Index(name, "(")
 			var (
 				parameter string
-				fname     string
+				pname     string
 			)
 			if sidx > 0 {
 				parameter = name[sidx+1 : len(name)-1]
-				fname = name[:sidx]
+				pname = name[:sidx]
 			} else {
-				fname = name
+				pname = name
 			}
-			fmt.Println("Plugin Name ", fname, parameter)
-			fmt.Println(c.P)
 
-			rtv, err := c.P.Exec("sample", parameter)
+			rtv, err := c.P.Exec(pname, parameter, c.w, c.r)
 			if err != nil {
 				fmt.Println(err.Error())
 			} else {
-				fmt.Println("PLUGIN RUN :", rtv)
+				fmt.Println("PLUGIN RUN : ", pname)
 			}
 
 			buffer.WriteString(c.text[0:v[0]])

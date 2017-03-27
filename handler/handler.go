@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/yundream/gowiki/wiki"
 	"html/template"
 	"net/http"
+	"strings"
 )
 
 type Options struct {
@@ -29,6 +31,7 @@ func New() (*Handler, error) {
 	h.Router = mux.NewRouter()
 	h.Router.HandleFunc("/ping", h.Ping).Methods("GET")
 	h.Router.HandleFunc("/w/{page:.+}", h.Viewer).Methods("GET")
+	h.Router.HandleFunc("/c/{page:.+}", h.CreatePage).Methods("GET")
 	http.Handle("/", h.Middleware(h.Router))
 	http.Handle("/theme/", http.FileServer(http.Dir("./")))
 	return h, nil
@@ -42,7 +45,7 @@ func (h Handler) Run(port string) error {
 
 func (h Handler) Middleware(handle http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Print("URL ", r.URL.Path)
+		fmt.Println("URL ", r.URL.Path)
 		handle.ServeHTTP(w, r)
 	})
 }
@@ -61,16 +64,52 @@ func (h *Handler) LoadTemplate(theme string) error {
 	return nil
 }
 
-func (h Handler) RenderPage(w http.ResponseWriter, pageName string) error {
+func (h Handler) LoadEditor(pageName string, w http.ResponseWriter) error {
 	err := h.Template.ExecuteTemplate(w, "head", nil)
 	if err != nil {
 		return err
 	}
-	page, err := h.Wiki.ReadPage(pageName)
+
+	err = h.Template.ExecuteTemplate(w, "tail", nil)
 	if err != nil {
 		return err
 	}
-	w.Write([]byte(page.Contents))
+
+	return nil
+}
+func (h Handler) RenderPage(w http.ResponseWriter, r *http.Request) error {
+	vars := mux.Vars(r)
+	pageName := vars["page"]
+
+	err := h.Template.ExecuteTemplate(w, "head", nil)
+	if err != nil {
+		return err
+	}
+
+	dirent := strings.Split(r.URL.Path, "/")
+	if dirent[1] == "c" {
+		pageName = "editor"
+	}
+
+	page, err := h.Wiki.ReadPage(pageName, w, r)
+	switch err {
+	case wiki.StatusPageNotFound:
+		var doc bytes.Buffer
+		t, err := template.ParseFiles("plugin/viewer/viewer.tmpl")
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return err
+		}
+		a := struct{ PageName string }{pageName}
+		err = t.Execute(&doc, a)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return err
+		}
+		w.Write(doc.Bytes())
+	case nil:
+		w.Write([]byte(page.Contents))
+	}
 	err = h.Template.ExecuteTemplate(w, "tail", nil)
 	if err != nil {
 		return err
