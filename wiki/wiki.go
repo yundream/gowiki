@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"github.com/yundream/gowiki/plugin"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
@@ -32,16 +33,12 @@ type Wiki struct {
 	compiler   *Compiler
 }
 
-func New(addr string) (*Wiki, error) {
+func New(addr string, p *plugin.PlugIns) (*Wiki, error) {
 	session, err := mgo.Dial(addr)
 	if err != nil {
 		return nil, err
 	}
-	compiler := Compiler{}
-	err = compiler.LoadPlugin()
-	if err != nil {
-		return nil, err
-	}
+	compiler := Compiler{P: p}
 	return &Wiki{Session: session,
 		DB:         "wiki",
 		Collection: "page",
@@ -58,6 +55,19 @@ func (w Wiki) CreatePage(page *Page) error {
 	return nil
 }
 
+func (w Wiki) IsPage(name string) (bool, error) {
+	c := w.Session.DB(w.DB).C(w.Collection)
+	q := c.Find(bson.M{"name": name})
+	n, err := q.Count()
+	if err != nil {
+		return true, err
+	}
+	if n == 0 {
+		return false, nil
+	}
+	return true, nil
+
+}
 func (w Wiki) ReadRawPage(name string) (Page, error) {
 	c := w.Session.DB(w.DB).C(w.Collection)
 	q := c.Find(bson.M{"name": name})
@@ -74,6 +84,11 @@ func (w Wiki) ReadRawPage(name string) (Page, error) {
 		return Page{}, err
 	}
 	return page, nil
+}
+
+func (w Wiki) SavePage(v interface{}) error {
+	err := w.Session.DB(w.DB).C(w.Collection).Insert(v)
+	return err
 }
 
 func (w Wiki) ReadPage(name string, writer http.ResponseWriter, r *http.Request) (*Page, error) {

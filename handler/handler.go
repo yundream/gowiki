@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/yundream/gowiki/plugin"
 	"github.com/yundream/gowiki/wiki"
 	"html/template"
 	"net/http"
-	"strings"
 )
 
 type Options struct {
@@ -20,18 +19,26 @@ type Handler struct {
 	DocumentDirectory string
 	Template          *template.Template
 	Wiki              *wiki.Wiki
+	P                 *plugin.PlugIns
 }
 
 func New() (*Handler, error) {
-	w, err := wiki.New("localhost")
+	p, err := plugin.Load()
 	if err != nil {
 		return nil, err
 	}
-	h := &Handler{Wiki: w}
+	w, err := wiki.New("localhost", p)
+	if err != nil {
+		return nil, err
+	}
+	h := &Handler{Wiki: w, P: p}
 	h.Router = mux.NewRouter()
 	h.Router.HandleFunc("/ping", h.Ping).Methods("GET")
 	h.Router.HandleFunc("/w/{page:.+}", h.Viewer).Methods("GET")
 	h.Router.HandleFunc("/c/{page:.+}", h.CreatePage).Methods("GET")
+	h.Router.HandleFunc("/e/{page:.+}", h.EditPage).Methods("GET")
+	h.Router.HandleFunc("/s/{page:.+}", h.SavePage).Methods("POST")
+	h.Router.HandleFunc("/api/{name}", h.CallAPI).Methods("POST", "GET", "DELETE")
 	http.Handle("/", h.Middleware(h.Router))
 	http.Handle("/theme/", http.FileServer(http.Dir("./")))
 	return h, nil
@@ -57,63 +64,6 @@ func (h *Handler) LoadTemplate(theme string) error {
 	h.Template, err = template.ParseFiles(
 		"theme/"+theme+"/head.html",
 		"theme/"+theme+"/tail.html")
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (h Handler) LoadEditor(pageName string, w http.ResponseWriter) error {
-	err := h.Template.ExecuteTemplate(w, "head", nil)
-	if err != nil {
-		return err
-	}
-	page, err := h.Wiki.ReadRawPage(pageName)
-	if err != nil {
-		return err
-	}
-	fmt.Println(page)
-	err = h.Template.ExecuteTemplate(w, "tail", nil)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-func (h Handler) RenderPage(w http.ResponseWriter, r *http.Request) error {
-	vars := mux.Vars(r)
-	pageName := vars["page"]
-
-	err := h.Template.ExecuteTemplate(w, "head", nil)
-	if err != nil {
-		return err
-	}
-
-	dirent := strings.Split(r.URL.Path, "/")
-	if dirent[1] == "c" {
-		pageName = "editor"
-	}
-
-	page, err := h.Wiki.ReadPage(pageName, w, r)
-	switch err {
-	case wiki.StatusPageNotFound:
-		var doc bytes.Buffer
-		t, err := template.ParseFiles("plugin/viewer/viewer.tmpl")
-		if err != nil {
-			w.Write([]byte(err.Error()))
-			return err
-		}
-		a := struct{ PageName string }{pageName}
-		err = t.Execute(&doc, a)
-		if err != nil {
-			w.Write([]byte(err.Error()))
-			return err
-		}
-		w.Write(doc.Bytes())
-	case nil:
-		w.Write([]byte(page.Contents))
-	}
-	err = h.Template.ExecuteTemplate(w, "tail", nil)
 	if err != nil {
 		return err
 	}

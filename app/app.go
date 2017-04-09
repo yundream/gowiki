@@ -19,6 +19,7 @@ func (a Application) Run() {
 		log.Fatal("Server run error : ", err.Error())
 	}
 	h.DocumentDirectory = "/opt/gowiki/doc"
+
 	err = h.LoadTemplate("joinc")
 	if err != nil {
 		log.Fatal("Server run error : ", err.Error())

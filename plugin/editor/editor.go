@@ -11,7 +11,10 @@ import (
 
 func Function_editor(data string, parameter string, w http.ResponseWriter, r *http.Request) string {
 	vars := mux.Vars(r)
-	pageName := vars["page"]
+	pageName, ok := vars["page"]
+	if !ok {
+		return "Page Not Found"
+	}
 	t, err := template.ParseFiles("plugin/editor/editor.tmpl")
 	if err != nil {
 		return ""
