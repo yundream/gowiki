@@ -14,14 +14,21 @@ import (
 )
 
 func Function_login(address string, parameter string, w http.ResponseWriter, r *http.Request) string {
-	var ok bool
-	session := sessions.SessionData{}
 	cookie, _ := r.Cookie("session-jwt")
-	fmt.Println("cookie", cookie.Value)
 	if cookie != nil {
-		session, ok = sessions.Validation(cookie.Value)
+		info, ok := sessions.Validation(cookie.Value)
 		if ok {
-			return ("LOGIN User")
+			fmt.Println(info)
+			t, err := template.ParseFiles("plugin/login/loginuser.tmpl")
+			if err != nil {
+				return ""
+			}
+			var doc bytes.Buffer
+			err = t.Execute(&doc, info)
+			if err != nil {
+				return err.Error()
+			}
+			return doc.String()
 		}
 	}
 
@@ -52,7 +59,6 @@ func Function_login(address string, parameter string, w http.ResponseWriter, r *
 		io.WriteString(h, password)
 		enpass := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-		fmt.Println(id, ":", password)
 		q := c.Find(bson.M{"email": id, "password": enpass})
 		n, err := q.Count()
 		if err != nil {

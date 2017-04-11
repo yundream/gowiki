@@ -86,8 +86,16 @@ func (w Wiki) ReadRawPage(name string) (Page, error) {
 	return page, nil
 }
 
-func (w Wiki) SavePage(v interface{}) error {
-	err := w.Session.DB(w.DB).C(w.Collection).Insert(v)
+func (w Wiki) SavePage(v Page) error {
+	ok, err := w.IsPage(v.Name)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		err = w.Session.DB(w.DB).C(w.Collection).Insert(v)
+	} else {
+		err = w.Session.DB(w.DB).C(w.Collection).Update(bson.M{"name": v.Name}, v)
+	}
 	return err
 }
 

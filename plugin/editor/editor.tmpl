@@ -1,4 +1,4 @@
-<h3 id="editor_title">문서 편집기 : {{.PageName}}</h3>
+<h3 id="editor_title">문서 편집기 : {{.Name}}</h3>
 <style>
 #editor {
 		position: relative !important;
@@ -7,21 +7,21 @@
 		z-index: 0;
 }
 </style>
-<form method="post" action="/s/{{.PageName}}">
+<form method="post" action="/s/{{.Name}}">
 	<div class="row">
 		<div class="small-12 columns">
-			제목 <input type="text" name="title" size=75/>
+				제목 <input type="text" name="title" size=75 value="{{.Title}}"/>
 		</div>
 	</div>
 	<p>
 	<div class="row">
 		<div class="small-12 columns">
-			<textarea name="wikidata" rows="15" cols="80"></textarea>
+			<textarea name="wikidata" rows="15" cols="80">{{.Contents}}</textarea>
 		</div>
 	</div>
 	<div class="row">
 		<div class="small-12 columns">
-			태그<input type="text" name="tag" size=75/>
+				태그<input type="text" name="tag" size=75/ value="{{.TagStr}}">
 		</div>
 	</div>
 
