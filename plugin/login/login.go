@@ -68,7 +68,7 @@ func Function_login(address string, parameter string, w http.ResponseWriter, r *
 			return "ID / Password FAIL"
 		}
 		if n == 1 {
-			tokenString := sessions.Create(sessions.SessionData{id, "yundream@gmail.com", true})
+			tokenString := sessions.Create(sessions.SessionData{id, "yundream@gmail.com", true, true})
 			cookie := http.Cookie{Name: "session-jwt", Value: tokenString, Path: "/", Domain: "localhost"}
 			http.SetCookie(w, &cookie)
 			return "Success"

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/yundream/gowiki/plugin"
+	"github.com/yundream/gowiki/sessions"
 	"github.com/yundream/gowiki/wiki"
 	"html/template"
 	"net/http"
@@ -13,6 +14,12 @@ type Options struct {
 	Name string
 	Age  int
 }
+
+type DocInfo struct {
+	PageName string
+	Session  sessions.SessionData
+}
+
 type Handler struct {
 	Theme             string
 	Router            *mux.Router
@@ -68,4 +75,14 @@ func (h *Handler) LoadTemplate(theme string) error {
 		return err
 	}
 	return nil
+}
+
+func GetJwt(r *http.Request) sessions.SessionData {
+	cookie, _ := r.Cookie("session-jwt")
+	info := sessions.SessionData{}
+	if cookie == nil {
+		return info
+	}
+	info, _ = sessions.Validation(cookie.Value)
+	return info
 }

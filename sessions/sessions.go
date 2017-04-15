@@ -14,6 +14,7 @@ type SessionData struct {
 	Name  string
 	Email string
 	Admin bool
+	Login bool
 }
 
 type UserClaims struct {
@@ -48,7 +49,8 @@ func Validation(tokenString string) (SessionData, bool) {
 			return []byte(MySecret), nil
 		})
 	if err != nil {
-		return SessionData{}, false
+		return SessionData{Login: false}, false
 	}
+	Claims.Session.Login = true
 	return Claims.Session, true
 }
