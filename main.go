@@ -10,5 +10,4 @@ func main() {
 	flag.Parse()
 	wiki := app.New(*port)
 	wiki.Run()
-
 }
