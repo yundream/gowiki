@@ -1,0 +1,31 @@
+<h3 id="editor_title">문서 편집기 : {{.Name}}</h3>
+<style>
+#editor {
+		position: relative !important;
+		border: 1px solid lightgray;
+		min-height:500px;
+		z-index: 0;
+}
+</style>
+<form method="post" action="/s/{{.Name}}">
+	<div class="row">
+		<div class="small-12 columns">
+				제목 <input type="text" name="title" size=75 value="{{.Title}}"/>
+		</div>
+	</div>
+	<p>
+	<div class="row">
+		<div class="small-12 columns">
+			<textarea name="wikidata" rows="15" cols="80">{{.Contents}}</textarea>
+		</div>
+	</div>
+	<div class="row">
+		<div class="small-12 columns">
+				태그<input type="text" name="tag" size=75/ value="{{.TagStr}}">
+		</div>
+	</div>
+
+	<input type="radio" name="publish" value="1"> 공개
+	<input type="radio" name="publish" value="0"> 미공개
+	<input type="submit" class="button" value="저장">
+</form>

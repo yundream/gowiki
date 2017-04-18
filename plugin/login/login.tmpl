@@ -1,0 +1,46 @@
+<style> 
+.login-box {
+	background: #fff;
+	border: 1px solid #ddd;
+	margin: 50px 0;
+	padding: 10px 20px 0 20px;
+}   
+.alert-box {
+	background: #f7f7f7;
+	color: #333;
+	border: none;
+	border-left: 6px solid #008CBA;
+	box-shadow: 0 5px 8px -6px rgba(0, 0, 0, 0.2); 
+}
+.alert-box.alert {
+	background: #f7f7f7;
+	color: #333; 
+}
+</style>
+<div class="large-5 large-centered columns">
+	<div class="login-box">
+		<div class="row">
+			<div class="large-12 columns">
+				<form action="/api/login" method="POST">
+					<div class="row">
+						<div class="large-12 columns">
+							<h4 class="text-center">이메일 주소로 로그인 하세요.</h4>
+							<input type="text" name="id" placeholder="sombody@email.com" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="large-12 columns">
+							<input type="password" name="password" placeholder="Password" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="large-12 large-centered columns">
+							<input type="submit" class="button expanded" value="로그인"/>
+						</div>
+					</div>
+				</form> 
+			</div>    
+		</div>
+	</div>
+</div>
+

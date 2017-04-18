@@ -1,0 +1,134 @@
+{{define "head"}}
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<!--[if IE 10]><html class="ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+<head>
+	<title>Title</title>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<meta name="google-site-verification" content="x_3_02sxiKKDpTo7b1K5qtTpt39BXF_BhZ3oYUO9qdg" />
+	<meta property="fb:app_id" content="892313440881489" />
+	<link rel="stylesheet" href="/theme/joinc/css/foundation.css" />
+	<script src="/theme/joinc/js/vendor/what-input.js"></script>
+	<script src="/theme/joinc/js/vendor/jquery.js"></script>
+	<script src="/theme/joinc/js/vendor/foundation.min.js"></script>
+	<style type="text/css" media="screen">
+	</style>
+</head>
+<style>
+.title-bar {
+background: #333;
+padding: 0.9rem; }
+
+.top-bar {
+	background: #333; 
+}
+.top-bar ul {
+	background: #333; 
+}
+.top-bar ul li {
+	background: #333; 
+}
+.top-bar ul li a {
+	color: #fff; 
+}
+
+.menu-text {
+	color: #fff; 
+}
+@media only screen and (max-width: 40em) {
+  .menu-text {
+   	 display: none !important; 
+	} 
+}
+
+@media only screen and (min-width: 40em) {
+	.menu:last-child {
+    border-left: 1px solid #4e4e4e; 
+	}
+  .menu:first-child {
+    border-left: none; 
+	}
+  .menu li:not(:last-child) {
+		border-right: 1px solid #4e4e4e; 
+	} 
+}
+.dropdown.menu .submenu {
+	border: none; 
+}
+
+.dropdown.menu .is-dropdown-submenu-parent.is-right-arrow > a::after {
+  border-color: #fff transparent transparent; 
+}
+.is-drilldown-submenu-parent > a::after {
+	border-color: transparent transparent transparent #fff; 
+}
+.js-drilldown-back::before {
+	border-color: transparent #fff transparent transparent; 
+}
+</style>
+<body>
+	<div class="title-bar" data-responsive-toggle="main-menu" data-hide-for="medium">
+		<button class="menu-icon" type="button" data-toggle></button>
+		<div class="title-bar-title">Menu</div>
+	</div>
+	<div class="top-bar" id="main-menu">
+		<div class="top-bar-left">
+			<ul class="dropdown menu" data-dropdown-menu>
+				<li class="menu-text"><a href="/w/FrontPage">Joinc</a></li>
+				<li class="has-submenu">
+					<a href="#">사용자</a>
+					<ul class="submenu menu vertical" data-submenu>
+						<li class="menu-text"><a href="/w/User">사용자 설정</a></li>
+						<li class="menu-text"><a href="/w/Logout">로그아웃</a></li>
+					</ul>
+				</li>
+				<li class="menu-text"><a href="/w/About">About</a></li>
+				<li class="menu-text"><a data-open="pageInfo">문서정보</a></li>
+				<li class="menu-text"><a href="/w/login">로그인</a></li>
+			</ul>
+		</div>
+		<div class="top-bar-right">
+				<form method="post" action="https://www.joinc.co.kr/w/search">
+				<ul class="menu">
+					<li>
+					</li>
+				</ul>
+				</form>
+			</div>
+		</div>
+		<div class="reveal" id="pageInfo" data-reveal>
+				<h2 id="modalTitle">문서정보</h2>
+				<ul>
+						<li>문서이름 : </li>
+						<li>문서아이디 : </li>
+						<li>저자 : </li>
+						<li>생성일 : </li>
+						<li>업데이트 : </li>
+				</ul>
+				<button class="close-button" data-close aria-label="Close reveal" type="button">
+						<span aria-hidden="true">&times;</span>
+				</button>
+		</div>
+	</div>
+	<div class="contents">
+	<div class="row">
+	<!-- current directory -->
+		<script>
+$(function() {
+	var pathname = window.location.pathname
+	var dirent = pathname.split("/")
+
+	var str = '<ul class="breadcrumbs">'
+	var currentdir=''
+	for (i = 2; i < dirent.length; i++) {
+		currentdir += '/'+dirent[i]
+		str += '<li><a href="/w'+currentdir+'">'+dirent[i]+'</a></li>'
+	}
+	str += '</ul>'
+	$("#jpath").html(str)
+})
+		</script>
+		<div id="jpath">
+		</div>
+{{end}}
