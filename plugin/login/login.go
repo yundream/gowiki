@@ -38,8 +38,11 @@ func Function_login(address string, parameter string, w http.ResponseWriter, r *
 		if err != nil {
 			return ""
 		}
+		reason := r.URL.Query().Get("t")
+		if len(reason) != 0 {
+		}
 
-		a := struct{}{}
+		a := struct{ T string }{T: reason}
 		var doc bytes.Buffer
 		err = t.Execute(&doc, a)
 
@@ -65,13 +68,14 @@ func Function_login(address string, parameter string, w http.ResponseWriter, r *
 			return err.Error()
 		}
 		if n == 0 {
-			return "ID / Password FAIL"
+			http.Redirect(w, r, "/w/login?t=fail", http.StatusMovedPermanently)
 		}
 		if n == 1 {
 			tokenString := sessions.Create(sessions.SessionData{id, "yundream@gmail.com", true, true})
 			cookie := http.Cookie{Name: "session-jwt", Value: tokenString, Path: "/", Domain: "localhost"}
 			http.SetCookie(w, &cookie)
-			return "Success"
+			http.Redirect(w, r, "/w/login", http.StatusMovedPermanently)
+			return ""
 		}
 	}
 	return "FAIL"

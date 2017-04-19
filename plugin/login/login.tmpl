@@ -38,6 +38,13 @@
 							<input type="submit" class="button expanded" value="로그인"/>
 						</div>
 					</div>
+					{{if eq .T "fail"}}
+					<div class="row">
+						<div class="large-12 large-centered columns">
+							<span class="hollow button alert">로그인 실패</span>
+						</div>
+					</div>
+					{{end}}
 				</form> 
 			</div>    
 		</div>
