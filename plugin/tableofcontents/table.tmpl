@@ -1,0 +1,60 @@
+<script>
+Array.prototype.myjoin = function(delim, depth) {
+	var str = "";
+	depth++;
+	for(i = 0; (i < this.length ) && (i < depth); i++) {
+		str+=String(this[i])+delim;
+	}
+	return str;
+}
+
+Array.prototype.fill = function(value, from) {
+	for (i = from; i < this.length; i++) {
+		this[i] = value;
+	}
+}
+
+function StrRepeat(str, num) {
+	return Array(num+1).join(str)
+}
+$(document).ready(function() {
+	var isstart=true;
+	var offset = 0;
+	var depth=[0,0,0,0,0];
+	var prev_depth = 0;
+	var docIndex=[];
+	$.each($(".head"), function(index) {
+		var level = Number($(this).prop("tagName").substr(1));
+		if (isstart){
+			offset = -level
+				isstart = false;
+		}
+		idx = level + offset;
+		if ( idx != prev_depth) {
+			if (idx > prev_depth) {
+				depth.fill(0, idx);
+			}
+			prev_depth = idx;
+		}
+		depth[idx]++;
+		var idxstr= depth.myjoin(".",idx);
+		$(this).html("<a id='s-"+idxstr+"'></a>"+"<a href='#toc'>"+idxstr+"</a>"+$(this).text());
+
+		var indent = StrRepeat("&nbsp", (level-1)*4);
+		docIndex.push("<li>"+indent+"<a href='#s-"+idxstr+"'><b>"+$(this).text()+"</b></a></li>");
+	});
+	$("#docIndex").html("<ul class='no-bullet' id='toc_body'>\n"+docIndex.join("\n")+"</ul>\n")
+})
+</script>
+<a name='toc'></a>
+<h3>목차 <i class='fi-plus' id='index_toc'></i></h3>
+<div id="docIndex">
+</div>
+<script>
+$("#docIndex").hide()
+$("#index_toc").click(function() {
+	$("#docIndex").toggle(function() {
+		$("#index_toc").toggleClass("fi-plus fi-minus")
+	})
+});
+</script>
