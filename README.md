@@ -1,80 +1,13 @@
 # gowiki
+Joinc wiki 관리 목적으로 만든 wiki 시스템이다. joinc wiki는 3번 재 작성됐다. 
+ 1. PHP 기반의 Moniwiki로 시작했다. 2002년부터 2014년 까지 12년 가까이 사용했다. 
+ 2. Moniwiki는 파일 기반으로 관리와 확장이 까다롭다. Go 언어로 다시 만들었다. 지금 운용중인 joinc 사이트의 엔진이다.
+ 3. 2016년 12월 부터 다시 만들고 있다. gowiki의 핵심은 plugin의 지원인데, 1.8이 plugin을 정식지원하면서 기존의 시스템을 갈아 엎고 싶었기 때문이다. 코드도 좀 정리할 겸  
+## 데이터베이스 
+MongoDB를 사용한다.
+
+## Wiki 엔진
+Moniwiki의 문법을 기본으로 하고 있다. Moniwiki는 엄청나게 많은, 그렇지만 대부분 쓸데없는 기능들을지원한다. 필요없는 것들을 다 버리고 10개내외의 문법만 지원한다. wiki 엔진의 모습은 http://www.joinc.co.kr 를 보면 대략 어떤 느낌인지 확인 할 수 있다.  
+
 ## Plugin 시스템
-```go
-package plugin
-
-import ()
-
-type Plugin struct {
-    version string
-}
-
-func (p Plugin) Version() string {
-    return p.version
-}
-func (p *Plugin) SetVersion(ver string) {
-    p.version = ver
-}
-```
-
-```go
-# plugin/helloworld
-package helloworld
-
-import (
-    "bitbucket.org/dream_yun/testimport/plugin"
-)
-
-// plugin을 embeded 한다.
-type Hello struct {
-    plugin.Plugin
-}
-func New(p plugin.Plugin) *Hello {
-    return &Hello{p}
-}
-
-// 플러그인 함수를 개발한다.
-func (h Hello) Sum(a, b int) int {
-    return a + b
-}
-```
-
-테스트다. 지금은 하드코딩 했는데, 실제 구현에서는 템플릿으로 go 코드를 만들어서 빌드를 해야 할 것 같다.
-
-* plugin 디렉토리에 있는 파일을 읽어서 import 목록을 구성한다.
-* plugin 디렉토리에 있는 파일 이름으로 packagename.New()를 호출 플러그인 맵을 구성한다.
-
-```go
-package main
-
-import (
-    "bitbucket.org/dream_yun/testimport/plugin"
-    "bitbucket.org/dream_yun/testimport/plugin/helloworld"
-    "fmt"
-    "reflect"
-)
-
-func main() {
-    p := plugin.Plugin{}
-    p.SetVersion("v3.0")
-
-    // plugin을 읽어온다.
-    // 실제 코드에서는 plugin/ 디렉토리에서 읽어서 처리하게 한다.
-    plugin_helloworld := helloworld.New(p)
-    method := reflect.TypeOf(plugin_helloworld)
-
-    F := make(map[string]reflect.Value)
-    for i := 0; i < method.NumMethod(); i++ {
-        name := method.Method(i).Name
-        fmt.Println("Reflect method ", name)
-        reflectMethd := reflect.ValueOf(plugin_helloworld).MethodByName(name)
-        F["helloworld/"+method.Method(i).Name] = reflectMethd
-
-    }
-    mm, ok := F["helloworld/Sum"]
-    if ok {
-        r := mm.Call([]reflect.Value{reflect.ValueOf(1), reflect.ValueOf(2)})
-        fmt.Println(r[0].Int())
-    }
-}
-```
+go1.8에 추가된 plugin 시스템을 이용해서 만들고 있다. 컴파일 없이, 플러그인을 실행하는게 목표다. 일단 잘 작동하는 걸 확인했고, 기존에 사용하던 플러그인 모듈을 새로운 플러그인 환경에 맞게 수정하는 작업을 하고 있다.
