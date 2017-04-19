@@ -34,8 +34,9 @@ func (h *Handler) Viewer(w http.ResponseWriter, r *http.Request) {
 func (h Handler) RenderPage(w http.ResponseWriter, r *http.Request) error {
 	vars := mux.Vars(r)
 	pageName := vars["page"]
+	info := GetJwt(r)
 
-	err := h.Template.ExecuteTemplate(w, "head", nil)
+	err := h.Template.ExecuteTemplate(w, "head", DocInfo{PageName: pageName, Session: info})
 	if err != nil {
 		return err
 	}
@@ -46,7 +47,6 @@ func (h Handler) RenderPage(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	page, err := h.Wiki.ReadPage(pageName, w, r)
-	a := struct{ PageName string }{pageName}
 	switch err {
 	case wiki.StatusPageNotFound:
 		var doc bytes.Buffer
@@ -55,7 +55,7 @@ func (h Handler) RenderPage(w http.ResponseWriter, r *http.Request) error {
 			w.Write([]byte(err.Error()))
 			return err
 		}
-		err = t.Execute(&doc, a)
+		err = t.Execute(&doc, DocInfo{PageName: pageName, Session: info})
 		if err != nil {
 			w.Write([]byte(err.Error()))
 			return err
@@ -64,7 +64,7 @@ func (h Handler) RenderPage(w http.ResponseWriter, r *http.Request) error {
 	case nil:
 		w.Write([]byte(page.Contents))
 	}
-	err = h.Template.ExecuteTemplate(w, "tail", a)
+	err = h.Template.ExecuteTemplate(w, "tail", DocInfo{PageName: pageName, Session: info})
 	if err != nil {
 		return err
 	}

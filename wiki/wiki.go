@@ -132,7 +132,7 @@ func (w Wiki) ReadPage(name string, writer http.ResponseWriter, r *http.Request)
 				buffer.WriteString(compilerIns.String())
 			}
 		default:
-			compilerIns.List().Head().EscapeString().Body()
+			compilerIns.EscapeString().List().Head().Body()
 			buffer.WriteString(compilerIns.String())
 		}
 	}

@@ -8,6 +8,7 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 	<meta name="google-site-verification" content="x_3_02sxiKKDpTo7b1K5qtTpt39BXF_BhZ3oYUO9qdg" />
 	<meta property="fb:app_id" content="892313440881489" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="/theme/joinc/css/foundation.css" />
 	<script src="/theme/joinc/js/vendor/what-input.js"></script>
 	<script src="/theme/joinc/js/vendor/jquery.js"></script>
@@ -76,16 +77,20 @@ padding: 0.9rem; }
 		<div class="top-bar-left">
 			<ul class="dropdown menu" data-dropdown-menu>
 				<li class="menu-text"><a href="/w/FrontPage">Joinc</a></li>
+				<li class="menu-text"><a href="/w/About">About</a></li>
+				<li class="menu-text"><a data-open="pageInfo">문서정보</a></li>
+				{{if not .Session.Login}}
+				<li class="menu-text"><a href="/w/login">로그인</a></li>
+				{{end}}
 				<li class="has-submenu">
+					{{if .Session.Login}}
 					<a href="#">사용자</a>
 					<ul class="submenu menu vertical" data-submenu>
 						<li class="menu-text"><a href="/w/User">사용자 설정</a></li>
-						<li class="menu-text"><a href="/w/Logout">로그아웃</a></li>
+						<li class="menu-text"><a href="/w/login">로그아웃</a></li>
 					</ul>
+					{{end}}
 				</li>
-				<li class="menu-text"><a href="/w/About">About</a></li>
-				<li class="menu-text"><a data-open="pageInfo">문서정보</a></li>
-				<li class="menu-text"><a href="/w/login">로그인</a></li>
 			</ul>
 		</div>
 		<div class="top-bar-right">

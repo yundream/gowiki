@@ -18,10 +18,9 @@ func (h *Handler) CreatePage(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "페이지가 이미 존재합니다.")
 		return
 	}
-	err = h.LoadEditor(pageName, w)
+	err = h.Editor(pageName, w)
 	if err != nil {
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	fmt.Println(err)
 }

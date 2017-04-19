@@ -44,3 +44,32 @@ func (h Handler) LoadEditor(pageName string, w http.ResponseWriter) error {
 	fmt.Fprint(w, doc.String())
 	return nil
 }
+
+func (h Handler) Editor(pageName string, w http.ResponseWriter) error {
+	err := h.Template.ExecuteTemplate(w, "head", nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = h.Template.ExecuteTemplate(w, "tail", nil)
+	}()
+	t, err := template.ParseFiles("plugin/editor/editor.tmpl")
+	if err != nil {
+		return err
+	}
+	var doc bytes.Buffer
+	a := struct {
+		Name     string
+		Title    string
+		Contents string
+		TagStr   string
+	}{Name: pageName}
+	err = t.Execute(&doc, a)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	fmt.Fprint(w, doc.String())
+	return nil
+
+}
