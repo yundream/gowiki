@@ -29,12 +29,13 @@ type Handler struct {
 	P                 *plugin.PlugIns
 }
 
-func New() (*Handler, error) {
+func New(mongoAddr string) (*Handler, error) {
 	p, err := plugin.Load()
 	if err != nil {
 		return nil, err
 	}
-	w, err := wiki.New("localhost", p)
+	fmt.Println("Mongo", mongoAddr)
+	w, err := wiki.New(mongoAddr, p)
 	if err != nil {
 		return nil, err
 	}
